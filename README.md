@@ -3,3 +3,5 @@ it`s a test sign
 testing repository
 what`s happened?
 I don`t know
+
+people = ['mark', 'charlie', 'khris']
