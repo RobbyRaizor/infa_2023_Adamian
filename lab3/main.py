@@ -3,13 +3,16 @@ import pygame
 import math as m
 import pygame.draw as pd
 import sys
+import random
 
 screen_color = (255, 255, 255)
+screen_size_x, screen_size_y = 900, 900
+bot_steps = (-3, -2 , -1, 1, 2, 3)
 
 def main():
     global screen_color
     pygame.init()
-    screen = pygame.display.set_mode((600, 600))
+    screen = pygame.display.set_mode((screen_size_x, screen_size_y))
     screen.fill(screen_color)
     FPS = 60
 
@@ -20,7 +23,10 @@ def main():
     pygame.display.update()
     clock = pygame.time.Clock()
 
+    any_faces = create_faces(screen, 3, bot_steps)
+
     while True:
+        screen.fill(screen_color)
         keys = pygame.key.get_pressed()
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -35,12 +41,16 @@ def main():
                         screen_color = (255, 255, 255)
 
         face.move(keys, 2, 1)
+        for bot_face in any_faces:
+            bot_face.move_auto()
+            bot_face.draw_face()
+
         pygame.display.flip()
 
 
 class Face():
     """Draw the face at the center of the screen and returns the face"""
-    def __init__(self, screen):
+    def __init__(self, screen, speed_x = 0, speed_y = 0):
         self.screen = screen
         screen_coordinate = self.screen.get_size()
         self.coord = screen_coordinate
@@ -48,6 +58,8 @@ class Face():
         self.pos_y = self.coord[1]/2
         self.pos_x = self.coord[0]/2
         self.size = 100
+        self.speed_x = speed_x
+        self.speed_y = speed_y
 
     global draw_mouth, draw_eyes
 
@@ -59,21 +71,65 @@ class Face():
 
     def move(self, keys, dist, size):
         global screen_color
+        check_y_min = self.pos_y <= self.size
+        check_y_plus = self.pos_y >= self.coord[1] - self.size
+        if keys[pygame.K_LSHIFT]:
+            dist *= 2
         if keys[pygame.K_w]:
-            self.pos_y -= dist
+            if keys[pygame.K_d] or keys[pygame.K_a]:
+                if self.pos_y > self.size:
+                    self.pos_y -= dist*0.71
+            else:
+                if self.pos_y > self.size:
+                    self.pos_y -= dist
         if keys[pygame.K_s]:
-            self.pos_y += dist
+            if keys[pygame.K_d] or keys[pygame.K_a]:
+                if self.pos_y < self.coord[1] - self.size:
+                    self.pos_y += dist*0.71
+            else:
+                if self.pos_y < self.coord[1] - self.size:
+                    self.pos_y += dist
         if keys[pygame.K_d]:
-            self.pos_x += dist
+            if keys[pygame.K_w] or keys[pygame.K_s]:
+                if self.pos_x < self.coord[0] - self.size:
+                    self.pos_x += dist*0.71
+            else:
+                if self.pos_x < self.coord[0] - self.size:
+                    self.pos_x += dist
         if keys[pygame.K_a]:
-            self.pos_x -= dist
+            if keys[pygame.K_w] or keys[pygame.K_s]:
+                if self.pos_x > self.size:
+                    self.pos_x -= dist*0.71
+            else:
+                if self.pos_x > self.size:
+                    self.pos_x -= dist
         if keys[pygame.K_UP]:
-            self.size += size
+
+            if self.size < self.coord[0]/2 and self.coord[1]/2:
+                self.size += size
+                if self.pos_x < self.size:
+                    self.pos_x += size
+                if self.pos_x > self.coord[0] - self.size:
+                    self.pos_x -= size
+                if self.pos_y < self.size:
+                    self.pos_y += size
+                if self.pos_y > self.coord[1] - self.size:
+                    self.pos_y -= size
+
+
         if keys[pygame.K_DOWN]:
             self.size -= size
 
-        self.screen.fill(screen_color)
         self.draw_face()
+
+    def move_auto(self):
+
+        if self.pos_x < self.size or self.pos_x > self.coord[0] - self.size:
+            self.speed_x = -self.speed_x
+        if self.pos_y < self.size or self.pos_y > self.coord[1] - self.size:
+            self.speed_y = -self.speed_y
+        self.pos_x += self.speed_x
+        self.pos_y += self.speed_y
 
 
 def draw_eyes(screen, face):
@@ -130,6 +186,13 @@ def draw_mouth(screen, face):
     pd.rect(screen, 'black', ((face.centerx - mouth_width*0.9 / 2),
                             (face.centery + mouth_coord_diff_y + mouth_height*1.2 / 2),
                             mouth_width*0.9, mouth_height*0.8))
+
+
+def create_faces(screen, value: int, steps):
+    value_x = random.choice(steps)
+    value_y = random.choice(steps)
+    return [Face(screen, speed_x = random.randint(-3, 3), speed_y = random.randint(-3, 3)) for i in range(value)]
+
 
 if __name__ == '__main__':
     main()
