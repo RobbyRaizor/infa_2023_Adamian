@@ -19,8 +19,10 @@ def main():
     FPS = 60
 
     # draw the face
-    face = Face(screen)
+    face = Player(screen)
     face.draw_face()
+    face.pos_y = 200
+    face.pos_x = 200
 
     pygame.display.update()
     clock = pygame.time.Clock()
@@ -37,15 +39,22 @@ def main():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    #any_faces.append(create_faces(screen, 1, bot_steps))
                     if screen_color == (255, 255, 255):
                         screen_color = (0, 0, 0)
                     elif screen_color == (0, 0, 0):
                         screen_color = (255, 255, 255)
 
         face.move(keys, 2, 1)
+
+
         for bot_face in any_faces:
-            bot_face.move_auto()
-            bot_face.draw_face()
+            bot_face.check_collision(face)
+            if bot_face.life == False:
+                pass
+            else:
+                bot_face.auto_move()
+                bot_face.draw_face()
 
         pygame.display.flip()
 
@@ -53,6 +62,7 @@ def main():
 class Face():
     """Draws the face at the center of the screen and returns the face"""
     global max_size, mix_size
+
     def __init__(self, screen, speed_x = 0, speed_y = 0):
         self.screen = screen
         screen_coordinate = self.screen.get_size()
@@ -65,12 +75,14 @@ class Face():
         self.speed_y = speed_y
         self.max_size = max_size
         self.min_size = min_size
+        self.life = True
 
 
     def draw_face(self):
-        self.face = pd.circle(self.screen, 'orange', (self.pos_x, self.pos_y), self.size)
-        self.draw_mouth()
-        self.draw_eyes()
+        if self.life:
+            self.face = pd.circle(self.screen, 'orange', (self.pos_x, self.pos_y), self.size)
+            self.draw_mouth()
+            self.draw_eyes()
 
 
     def draw_mouth(self):
@@ -127,6 +139,30 @@ class Face():
                   eye_radius * 0.5)
 
 
+    def auto_move(self):
+
+        if self.pos_x < self.size or self.pos_x > self.coord[0] - self.size:
+            self.speed_x = -self.speed_x
+        if self.pos_y < self.size or self.pos_y > self.coord[1] - self.size:
+            self.speed_y = -self.speed_y
+        self.pos_x += self.speed_x
+        self.pos_y += self.speed_y
+
+
+    def check_collision(self, object):
+        """Check collision"""
+        size_y = (self.pos_y-self.size, self.pos_y+self.size)
+        size_x = (self.pos_x - self.size, self.pos_x + self.size)
+        check_y = object.pos_y >= size_y[0] and object.pos_y <= size_y[1]
+        check_x = object.pos_x >= size_x[0] and object.pos_x <= size_x[1]
+        if check_x and check_y:
+            self.life = False
+
+class Player(Face):
+    '''Create player object based on Face class'''
+    def __init__(self, screen):
+        super().__init__(screen)
+
     def move(self, keys, dist, size):
         global screen_color
         check_y_min = self.pos_y <= self.size
@@ -178,17 +214,6 @@ class Face():
                 self.size -= size
 
         self.draw_face()
-
-
-    def move_auto(self):
-
-        if self.pos_x < self.size or self.pos_x > self.coord[0] - self.size:
-            self.speed_x = -self.speed_x
-        if self.pos_y < self.size or self.pos_y > self.coord[1] - self.size:
-            self.speed_y = -self.speed_y
-        self.pos_x += self.speed_x
-        self.pos_y += self.speed_y
-
 
 def create_faces(screen, value: int, steps):
     faces = []
