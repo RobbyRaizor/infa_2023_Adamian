@@ -52,7 +52,7 @@ def main():
 
 class Face():
     """Draws the face at the center of the screen and returns the face"""
-    global draw_mouth, draw_eyes, max_size, mix_size
+    global max_size, mix_size
     def __init__(self, screen, speed_x = 0, speed_y = 0):
         self.screen = screen
         screen_coordinate = self.screen.get_size()
@@ -69,8 +69,62 @@ class Face():
 
     def draw_face(self):
         self.face = pd.circle(self.screen, 'orange', (self.pos_x, self.pos_y), self.size)
-        draw_mouth(self.screen, self.face)
-        draw_eyes(self.screen, self.face)
+        self.draw_mouth()
+        self.draw_eyes()
+
+
+    def draw_mouth(self):
+        """Draws a mouth on the particular face"""
+        face_radius = self.face.width / 2
+        mouth_coord_diff_y = face_radius * 0.5
+        mouth_width = face_radius * 0.6
+        mouth_height = face_radius * 0.1
+        # draw lips
+        pd.rect(self.screen, 'red', ((self.face.centerx - mouth_width / 2),
+                                (self.face.centery + mouth_coord_diff_y + mouth_height / 2),
+                                mouth_width, mouth_height))
+        pd.rect(self.screen, 'black', ((self.face.centerx - mouth_width * 0.9 / 2),
+                                  (self.face.centery + mouth_coord_diff_y + mouth_height * 1.2 / 2),
+                                  mouth_width * 0.9, mouth_height * 0.8))
+
+
+    def draw_eyes(self):
+        """Draws eveil eyes on the particular face"""
+        face_radius = self.face.width / 2
+        eye_radius = face_radius * 0.1
+        eye_coordinate_diff = (face_radius * m.sin(m.radians(45))) * 0.5
+
+        # draw the left eye
+        pd.circle(self.screen, 'orange', ((self.face.centerx - eye_coordinate_diff),
+                                     (self.face.centery - eye_coordinate_diff)),
+                  eye_radius)
+        pd.circle(self.screen, 'white', ((self.face.centerx - eye_coordinate_diff),
+                                    (self.face.centery - eye_coordinate_diff)),
+                  eye_radius * 0.9)
+        pd.circle(self.screen, 'black', ((self.face.centerx - eye_coordinate_diff),
+                                    (self.face.centery - eye_coordinate_diff)),
+                  eye_radius * 0.5)
+        # draw the right eye
+        pd.circle(self.screen, 'orange', ((self.face.centerx + eye_coordinate_diff),
+                                     (self.face.centery - eye_coordinate_diff)),
+                  eye_radius)
+        pd.circle(self.screen, 'white', ((self.face.centerx + eye_coordinate_diff),
+                                    (self.face.centery - eye_coordinate_diff)),
+                  eye_radius * 0.9)
+        pd.circle(self.screen, 'black', ((self.face.centerx + eye_coordinate_diff),
+                                    (self.face.centery - eye_coordinate_diff)),
+                  eye_radius * 0.5)
+
+        # draw the right eye
+        pd.circle(self.screen, 'orange', ((self.face.centerx + eye_coordinate_diff),
+                                     (self.face.centery - eye_coordinate_diff)),
+                  eye_radius)
+        pd.circle(self.screen, 'white', ((self.face.centerx + eye_coordinate_diff),
+                                    (self.face.centery - eye_coordinate_diff)),
+                  eye_radius * 0.9)
+        pd.circle(self.screen, 'black', ((self.face.centerx + eye_coordinate_diff),
+                                    (self.face.centery - eye_coordinate_diff)),
+                  eye_radius * 0.5)
 
 
     def move(self, keys, dist, size):
@@ -134,61 +188,6 @@ class Face():
             self.speed_y = -self.speed_y
         self.pos_x += self.speed_x
         self.pos_y += self.speed_y
-
-
-def draw_eyes(screen, face):
-    """Draws eveil eyes on the particular face"""
-    face_radius = face.width/2
-    eye_radius = face_radius*0.1
-    eye_coordinate_diff = (face_radius * m.sin(m.radians(45)))*0.5
-
-    #draw the left eye
-    pd.circle(screen, 'orange', ((face.centerx - eye_coordinate_diff),
-                                 (face.centery - eye_coordinate_diff)),
-                                  eye_radius)
-    pd.circle(screen, 'white', ((face.centerx - eye_coordinate_diff),
-                                (face.centery - eye_coordinate_diff)),
-                                 eye_radius*0.9)
-    pd.circle(screen, 'black', ((face.centerx - eye_coordinate_diff),
-                                (face.centery - eye_coordinate_diff)),
-                                 eye_radius*0.5)
-    #draw the right eye
-    pd.circle(screen, 'orange', ((face.centerx + eye_coordinate_diff),
-                                 (face.centery - eye_coordinate_diff)),
-              eye_radius)
-    pd.circle(screen, 'white', ((face.centerx + eye_coordinate_diff),
-                                (face.centery - eye_coordinate_diff)),
-              eye_radius * 0.9)
-    pd.circle(screen, 'black', ((face.centerx + eye_coordinate_diff),
-                                (face.centery - eye_coordinate_diff)),
-              eye_radius * 0.5)
-
-
-    #draw the right eye
-    pd.circle(screen, 'orange', ((face.centerx + eye_coordinate_diff),
-                                 (face.centery - eye_coordinate_diff)),
-              eye_radius)
-    pd.circle(screen, 'white', ((face.centerx + eye_coordinate_diff),
-                                (face.centery - eye_coordinate_diff)),
-              eye_radius * 0.9)
-    pd.circle(screen, 'black', ((face.centerx + eye_coordinate_diff),
-                                (face.centery - eye_coordinate_diff)),
-              eye_radius * 0.5)
-
-
-def draw_mouth(screen, face):
-    """Draws a mouth on the particular face"""
-    face_radius = face.width / 2
-    mouth_coord_diff_y = face_radius*0.5
-    mouth_width = face_radius*0.6
-    mouth_height = face_radius*0.1
-    #draw lips
-    pd.rect(screen, 'red', ((face.centerx-mouth_width/2),
-                            (face.centery+mouth_coord_diff_y+mouth_height/2),
-                             mouth_width, mouth_height))
-    pd.rect(screen, 'black', ((face.centerx - mouth_width*0.9 / 2),
-                            (face.centery + mouth_coord_diff_y + mouth_height*1.2 / 2),
-                            mouth_width*0.9, mouth_height*0.8))
 
 
 def create_faces(screen, value: int, steps):
