@@ -7,7 +7,9 @@ import random
 
 screen_color = (255, 255, 255)
 screen_size_x, screen_size_y = 900, 900
-bot_steps = (-3, -2 , -1, 1, 2, 3)
+bot_steps = (-3, -2, -1, 1, 2, 3)
+max_size = 500
+min_size = 100
 
 def main():
     global screen_color
@@ -49,7 +51,8 @@ def main():
 
 
 class Face():
-    """Draw the face at the center of the screen and returns the face"""
+    """Draws the face at the center of the screen and returns the face"""
+    global draw_mouth, draw_eyes, max_size, mix_size
     def __init__(self, screen, speed_x = 0, speed_y = 0):
         self.screen = screen
         screen_coordinate = self.screen.get_size()
@@ -60,8 +63,9 @@ class Face():
         self.size = 100
         self.speed_x = speed_x
         self.speed_y = speed_y
+        self.max_size = max_size
+        self.min_size = min_size
 
-    global draw_mouth, draw_eyes
 
     def draw_face(self):
         self.face = pd.circle(self.screen, 'orange', (self.pos_x, self.pos_y), self.size)
@@ -104,8 +108,7 @@ class Face():
                 if self.pos_x > self.size:
                     self.pos_x -= dist
         if keys[pygame.K_UP]:
-
-            if self.size < self.coord[0]/2 and self.coord[1]/2:
+            if self.size < self.coord[0]/2 and self.coord[1]/2 and self.size < self.max_size/2:
                 self.size += size
                 if self.pos_x < self.size:
                     self.pos_x += size
@@ -116,11 +119,12 @@ class Face():
                 if self.pos_y > self.coord[1] - self.size:
                     self.pos_y -= size
 
-
         if keys[pygame.K_DOWN]:
-            self.size -= size
+            if self.size > self.min_size/2:
+                self.size -= size
 
         self.draw_face()
+
 
     def move_auto(self):
 
@@ -148,7 +152,6 @@ def draw_eyes(screen, face):
     pd.circle(screen, 'black', ((face.centerx - eye_coordinate_diff),
                                 (face.centery - eye_coordinate_diff)),
                                  eye_radius*0.5)
-
     #draw the right eye
     pd.circle(screen, 'orange', ((face.centerx + eye_coordinate_diff),
                                  (face.centery - eye_coordinate_diff)),
@@ -189,9 +192,12 @@ def draw_mouth(screen, face):
 
 
 def create_faces(screen, value: int, steps):
-    value_x = random.choice(steps)
-    value_y = random.choice(steps)
-    return [Face(screen, speed_x = random.randint(-3, 3), speed_y = random.randint(-3, 3)) for i in range(value)]
+    faces = []
+    for i in range(value):
+        value_x = random.choice(steps)
+        value_y = random.choice(steps)
+        faces.append(Face(screen, speed_x=value_x, speed_y=value_y))
+    return faces
 
 
 if __name__ == '__main__':
