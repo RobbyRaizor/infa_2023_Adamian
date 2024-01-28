@@ -11,6 +11,7 @@ bot_steps = (-3, -2, -1, 1, 2, 3)
 max_size = 500
 min_size = 100
 
+
 def main():
     global screen_color
     pygame.init()
@@ -19,15 +20,15 @@ def main():
     FPS = 60
 
     # draw the face
-    face = Player(screen)
-    face.draw_face()
-    face.pos_y = 200
-    face.pos_x = 200
+    player = Player(screen)
+    player.draw_face()
+    player.pos_y = 200
+    player.pos_x = 200
 
     pygame.display.update()
     clock = pygame.time.Clock()
 
-    any_faces = create_faces(screen, 3, bot_steps)
+    bots = create_faces(screen, 3, bot_steps)
 
     while True:
         screen.fill(screen_color)
@@ -39,22 +40,19 @@ def main():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    #any_faces.append(create_faces(screen, 1, bot_steps))
-                    if screen_color == (255, 255, 255):
-                        screen_color = (0, 0, 0)
-                    elif screen_color == (0, 0, 0):
-                        screen_color = (255, 255, 255)
-
-        face.move(keys, 2, 1)
+                    bots.append(create_faces(screen, 1, bot_steps)[0])
 
 
-        for bot_face in any_faces:
-            bot_face.check_collision(face)
-            if bot_face.life == False:
+        player.move(keys, 2, 1)
+
+
+        for bot in bots:
+            bot.check_collision(player)
+            if bot.life == False:
                 pass
             else:
-                bot_face.auto_move()
-                bot_face.draw_face()
+                bot.auto_move()
+                bot.draw_face()
 
         pygame.display.flip()
 
@@ -67,7 +65,6 @@ class Face():
         self.screen = screen
         screen_coordinate = self.screen.get_size()
         self.coord = screen_coordinate
-        self.face = None
         self.pos_y = self.coord[1]/2
         self.pos_x = self.coord[0]/2
         self.size = 100
@@ -76,14 +73,13 @@ class Face():
         self.max_size = max_size
         self.min_size = min_size
         self.life = True
-
+        self.face = pd.circle(self.screen, 'orange', (self.pos_x, self.pos_y), self.size)
 
     def draw_face(self):
         if self.life:
             self.face = pd.circle(self.screen, 'orange', (self.pos_x, self.pos_y), self.size)
             self.draw_mouth()
             self.draw_eyes()
-
 
     def draw_mouth(self):
         """Draws a mouth on the particular face"""
@@ -149,13 +145,16 @@ class Face():
         self.pos_y += self.speed_y
 
 
+
     def check_collision(self, object):
         """Check collision"""
-        size_y = (self.pos_y-self.size, self.pos_y+self.size)
+        """size_y = (self.pos_y-self.size, self.pos_y+self.size)
         size_x = (self.pos_x - self.size, self.pos_x + self.size)
         check_y = object.pos_y >= size_y[0] and object.pos_y <= size_y[1]
         check_x = object.pos_x >= size_x[0] and object.pos_x <= size_x[1]
-        if check_x and check_y:
+        if check_y and check_x:"""
+
+        if pygame.Rect.colliderect(self.face, object.face):
             self.life = False
 
 class Player(Face):
